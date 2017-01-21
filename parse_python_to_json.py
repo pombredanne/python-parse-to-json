@@ -63,6 +63,8 @@ if __name__ == "__main__":
     parser = optparse.OptionParser()
     parser.add_option("--pyfile", action="store", dest="pyfile",
                       help="Take input from a Python source file")
+    parser.add_option("--pp", action="store_true",
+                      help="Pretty-print JSON for human viewing")
     (options, args) = parser.parse_args()
 
     if options.pyfile:
@@ -73,12 +75,16 @@ if __name__ == "__main__":
         if code[-1] != '\n':
             code += '\n'
 
+    indent_level = None
+    if options.pp:
+        indent_level = 2
+
     try:
         p = pythonparser.parse(code)
 
         v = Visitor()
         res = v.visit(p)
-        print json.dumps(res)
+        print json.dumps(res, indent=indent_level)
     except pythonparser.diagnostic.Error as e:
         error_obj = {'type': 'parse_error'}
         diag = e.diagnostic
@@ -90,5 +96,5 @@ if __name__ == "__main__":
         }
 
         error_obj['message'] = diag.message()
-        print json.dumps(error_obj)
+        print json.dumps(error_obj, indent=indent_level)
         sys.exit(1)
