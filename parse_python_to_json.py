@@ -1,11 +1,32 @@
+'''
+
+Parses a Python source file into an AST in JSON format. can be viewed
+online in a viewer like: http://jsonviewer.stack.hu/
+
+Usage:
+
+python parse_python_to_json.py --pyfile=test.py      # pass in code within a file
+python parse_python_to_json.py 'print "Hello world"' # pass in code as a string
+
+Try running on its own source code; whoa very META!
+
+python parse_python_to_json.py --pyfile=parse_python_to_json.py
+
+
+Output: prints JSON to stdout
+
+Created on 2017-01-20 by Philip Guo
+'''
+
 import ast
 import json
-import pprint
-import pythonparser
+import optparse
+#import pprint
+import pythonparser # based on https://github.com/m-labs/pythonparser
 import os
 import sys
 
-pp = pprint.PrettyPrinter()
+#pp = pprint.PrettyPrinter()
 
 class Visitor:
     def visit(self, obj, level=0):
@@ -39,10 +60,15 @@ class Visitor:
 
 
 if __name__ == "__main__":
-    code = sys.argv[1] # can either pass in a string or a filename
-    if os.path.isfile(code):
-        code = open(sys.argv[1]).read()
+    parser = optparse.OptionParser()
+    parser.add_option("--pyfile", action="store", dest="pyfile",
+                      help="Take input from a Python source file")
+    (options, args) = parser.parse_args()
+
+    if options.pyfile:
+        code = open(options.pyfile).read()
     else:
+        code = args[0]
         # make sure it ends with a newline to get parse() to work:
         if code[-1] != '\n':
             code += '\n'
